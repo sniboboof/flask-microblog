@@ -2,26 +2,43 @@ import microblog
 import unittest
 
 class testBlog(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super(testBlog, self).__init__(*args, **kwargs)
+        microblog.app.config['SQLALCHEMY_DATABASE_URI']='postgres:///blagtest'
 
     def setUp(self):
-        #intiialize a dummy database for the tests to use
-        pass
+        microblog.db.create_all()
 
     def tearDown(self):
-        #remove the dummy database
-        pass
+        microblog.db.session.close()
+        microblog.db.drop_all()
 
     def testBlagPost(self):
-        #test making a post to the blog
-        pass
+        microblog.write_post("test title", "test body")
+        microblog.write_post("test title2", "test body2")
+        microblog.write_post("test title3", "test body3")
+
+        blags = microblog.BlagPost.query.all()
+
+        self.assertEqual(blags[0].title, "test title")
+        self.assertEqual(blags[2].body, "test body3")
 
     def testBlagGet(self):
-        #test reading the blog posts
-        pass
+        microblog.write_post("test title", "test body")
+        microblog.write_post("test title2", "test body2")
+        microblog.write_post("test title3", "test body3")
+        a = microblog.get_posts()
+
+        self.assertEqual(a[0].title, "test title")
+        self.assertEqual(a[2].body, "test body3")
 
     def testSingleGet(self):
-        #test reading a single, complete blog post
-        pass
+        microblog.write_post("test title", "test body")
+        microblog.write_post("test title2", "test body2")
+        microblog.write_post("test title3", "test body3")
+
+        self.assertEqual(microblog.get_post(1).title, "test title")
+        self.assertEqual(microblog.get_post(3).body, "test body3")
 
 if __name__ == "__main__":
     unittest.main()
