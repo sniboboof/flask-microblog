@@ -3,4 +3,9 @@ language: python
 
 install: sudo pip install -r requirements.txt
 
+services: postgreSQL
+
+before-script:
+  - psql -c "CREATE DATABASE blagtest;" -U postgres
+
 script: python tests.py

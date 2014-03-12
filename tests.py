@@ -4,7 +4,7 @@ import unittest
 class testBlog(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(testBlog, self).__init__(*args, **kwargs)
-        microblog.app.config['SQLALCHEMY_DATABASE_URI']='postgres:///blagtest'
+        microblog.app.config['SQLALCHEMY_DATABASE_URI']='postgres://postgres:@localhost/blagtest'
 
     def setUp(self):
         microblog.db.create_all()
