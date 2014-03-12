@@ -8,4 +8,4 @@ As a user, when I want to look at all my blog posts, I call get_posts() so flask
 
 As a user, when I want to look at a specific blog post, I call get_post(id) with the id primary key of the post so flask will return the only post with that id
 
-travis token: UEnXtp8Txs23Du1sCKvs
+travis badge: https://api.travis-ci.org/sniboboof/flask-microblog.png?branch=master
