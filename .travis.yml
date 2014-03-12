@@ -1,6 +1,6 @@
 language: python
   - "2.7"
 
-install: sudo pip install -f requirements.txt
+install: "sudo pip install -f requirements.txt"
 
 script: python tests.py
