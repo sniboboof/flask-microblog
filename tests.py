@@ -17,10 +17,23 @@ class testBlog(unittest.TestCase):
         microblog.db.session.close()
         microblog.db.drop_all()
 
+    def testRegisterAuthor(self):
+        microblog.register_author('jack', 'markley')
+        microblog.register_author('ben', 'markley')
+        microblog.register_author('jeff', 'david')
+
+        authros = microblog.Author.query.all()
+
+        self.assertEqual(authros[0].name, 'jack')
+        self.assertEqual(authros[2].name, 'jeff')
+        self.assertEqual(authros[1].password, 'markley')
+        self.assertEqual(authros[2].password, 'david')
+
     def testBlagPost(self):
-        microblog.write_post("test title", "test body")
-        microblog.write_post("test title2", "test body2")
-        microblog.write_post("test title3", "test body3")
+        microblog.register_author('jack', 'markley')
+        microblog.write_post("test title", "test body", 1)
+        microblog.write_post("test title2", "test body2", 1)
+        microblog.write_post("test title3", "test body3", 1)
 
         blags = microblog.BlagPost.query.all()
 
@@ -28,41 +41,45 @@ class testBlog(unittest.TestCase):
         self.assertEqual(blags[2].body, "test body3")
 
     def testBlagGet(self):
-        microblog.write_post("test title", "test body")
-        microblog.write_post("test title2", "test body2")
-        microblog.write_post("test title3", "test body3")
+        microblog.register_author('jack', 'markley')
+        microblog.write_post("test title", "test body", 1)
+        microblog.write_post("test title2", "test body2", 1)
+        microblog.write_post("test title3", "test body3", 1)
         a = microblog.get_posts()
 
         self.assertEqual(a[2].title, "test title")
         self.assertEqual(a[0].body, "test body3")
 
     def testSingleGet(self):
-        microblog.write_post("test title", "test body")
-        microblog.write_post("test title2", "test body2")
-        microblog.write_post("test title3", "test body3")
+        microblog.register_author('jack', 'markley')
+        microblog.write_post("test title", "test body", 1)
+        microblog.write_post("test title2", "test body2", 1)
+        microblog.write_post("test title3", "test body3", 1)
 
         self.assertEqual(microblog.get_post(1).title, "test title")
         self.assertEqual(microblog.get_post(3).body, "test body3")
 
     def testPostsView(self):
+        microblog.register_author('jack', 'markley')
         rv = self.app.get('/')
         assert 'No posts yet' in rv.data
 
-        microblog.write_post("test title", "test body")
-        microblog.write_post("test title2", "test body2")
-        microblog.write_post("test title3", "test body3")
+        microblog.write_post("test title", "test body", 1)
+        microblog.write_post("test title2", "test body2", 1)
+        microblog.write_post("test title3", "test body3", 1)
         rv = self.app.get('/')
         assert 'test title' in rv.data
         assert 'test title2' in rv.data
         assert 'test title3' in rv.data
 
     def testPostView(self):
+        microblog.register_author('jack', 'markley')
         rv = self.app.get('/post/1')
         assert "That post hasn't been written yet!" in rv.data
 
-        microblog.write_post("test title", "test body")
-        microblog.write_post("test title2", "test body2")
-        microblog.write_post("test title3", "test body3")
+        microblog.write_post("test title", "test body", 1)
+        microblog.write_post("test title2", "test body2", 1)
+        microblog.write_post("test title3", "test body3", 1)
         rv = self.app.get('/post/1')
         assert 'test title' in rv.data
         assert 'test body' in rv.data

@@ -20,20 +20,32 @@ manager.add_command('db', MigrateCommand)
 
 class BlagPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.Unicode(127))
+    title = db.Column(db.Unicode(127), nullable=False)
     body = db.Column(db.UnicodeText)
-    birthdate = db.Column(db.DateTime)
+    birthdate = db.Column(db.DateTime, nullable=False)
+    authorid = db.Column(db.Integer, db.ForeignKey("author.id"), nullable=False)
 
-    def __init__(self, title, body, posttime):
+    def __init__(self, title, body, posttime, authorid):
         self.title = unicode(title)
         self.body = unicode(body)
         self.birthdate = posttime
+        self.authorid = authorid
 
-# class Author(db.Model):
-#     pass
+class Author(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Unicode(31), nullable=False, unique=True)
+    password = db.Column(db.Unicode(127), nullable=False)
 
-def write_post(title, body):
-    db.session.add(BlagPost(title, body, datetime.now()))
+    def __init__(self, name, password):
+        self.name = name
+        self.password = password
+
+def register_author(name, password):
+    db.session.add(Author(name, password))
+    db.session.commit()
+
+def write_post(title, body, authorid):
+    db.session.add(BlagPost(title, body, datetime.now(), authorid))
     db.session.commit()
 
 def get_posts():
