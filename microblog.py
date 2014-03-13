@@ -1,5 +1,6 @@
 import pdb
 from flask import Flask
+from flask import request
 from jinja2 import Template
 from datetime import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -69,9 +70,19 @@ def post_view(postid):
     except AttributeError:
         return Template("That post hasn't been written yet!").render()
 
-@app.route('/write')
-def write_view(body):
-    pass
+@app.route('/write', methods=['GET', 'POST'])
+def write_view():
+    if request.method == 'GET':
+        #display the writing GUI
+        return Template("""
+            <form id='blagform' name='blagform' method='post' action='write'>
+                <textarea name='blagtext' id='textarea' rows='5' cols='100' placeholder='type your blag here'></textarea><br/>
+                <input type='submit' name='submit' id='submit' value='Submit'/>
+            </form>
+            """).render()
+    elif request.method == 'POST':
+        #put the post in the database, then load the blog view
+        return Template("success").render()
 
 if __name__ == "__main__":
     manager.run()

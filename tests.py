@@ -58,7 +58,7 @@ class testBlog(unittest.TestCase):
 
     def testPostView(self):
         rv = self.app.get('/post/1')
-        assert '404' in rv.data
+        assert "That post hasn't been written yet!" in rv.data
 
         microblog.write_post("test title", "test body")
         microblog.write_post("test title2", "test body2")
@@ -73,7 +73,7 @@ class testBlog(unittest.TestCase):
         assert 'test title3' in rv.data
         assert 'test body3' in rv.data
         rv = self.app.get('/post/78')
-        assert '404' in rv.data
+        assert "That post hasn't been written yet!" in rv.data
 
     def testWriteView(self):
         pass
