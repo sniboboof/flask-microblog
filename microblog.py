@@ -41,7 +41,7 @@ class Author(db.Model):
         self.password = password
 
 def register_author(name, password):
-    db.session.add(Author(name, password))
+    db.session.add(Author(unicode(name), unicode(password)))
     db.session.commit()
 
 def write_post(title, body, authorid):
