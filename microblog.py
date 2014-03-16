@@ -1,6 +1,7 @@
 import pdb
 from flask import Flask
 from flask import request
+from flask import session
 from jinja2 import Template
 from datetime import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -10,6 +11,14 @@ from flask.ext.migrate import Migrate, MigrateCommand
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']="postgres:///microblog"
 app.config['DEBUG'] = True
+#i'm not going to keep my secret_key in a public github
+try:
+    secretfile = open("secret_key", "r")
+    app.secret_key = secretfile.read()
+    secretfile.close()
+except IOError:
+    print "WARNING: USING AN INSECURE KEY MEANT ONLY FOR TESTING PURPOSES"
+    app.secret_key = """fhp9nap9p(*Y932uhl'po[]\\'p1'poi34["""
 db = SQLAlchemy(app)
 
 db = SQLAlchemy(app)

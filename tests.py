@@ -12,7 +12,6 @@ class testBlog(unittest.TestCase):
         microblog.app.config['TESTING'] = True
         self.app = microblog.app.test_client()
         microblog.db.create_all()
-        microblog.register_author('testname', 'testpassword')
 
     def tearDown(self):
         microblog.db.session.close()
