@@ -1,12 +1,14 @@
-import pdb
 from flask import Flask
 from flask import request
 from flask import session
+from flask import redirect
+from flask import render_template
 from jinja2 import Template
 from datetime import datetime
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
+from flaskext.bcrypt import Bcrypt
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']="postgres:///microblog"
@@ -26,6 +28,24 @@ migrate = Migrate(app, db)
 
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
+
+bcrypt = Bcrypt(app)
+
+#i know i should refactor all of my html into separate files,
+#but that's a project for another day.
+notloggedintemplate="""
+<form id='loginform' name='loginform' method='post' action='login'>
+    username:<input type='text' name='username' id='username'/>
+    password:<input type='password' name='password' id='password' />
+    <input type='submit' name='submit' id='submit' value='Submit'/>
+</form>
+<br/>"""
+loggedintemplate="""
+<form id='logoutform' name='logoutform' method='post' action='logout'>
+    You are logged in as {{username}}
+    <input type='submit' id='submit' name='submit' value='Logout'/>
+</form><br/>
+"""
 
 class BlagPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -61,46 +81,100 @@ def get_posts():
     return BlagPost.query.order_by(BlagPost.birthdate.desc()).all()
 
 def get_post(id):
-    return BlagPost.query.filter_by(id=id).first()
+    q = BlagPost.query.filter_by(id=id)
+    if q.count() != 0:
+        return q.first()
+    else:
+        return None
 
 @app.route('/')
 def posts_view():
     myposts = get_posts()
-    viewpage = Template("""
-                        {% if myposts|length %}
-                            {% for post in myposts %}
-                                {{post.title}}<br/>{{post.birthdate}}<br/><br/>
-                            {% endfor %}
-                        {% else %}
-                            No posts yet
-                        {% endif %}
-                        """)
-    return viewpage.render(myposts=myposts)
+    pagebody = """
+                {% if myposts|length %}
+                    {% for post in myposts %}
+                        {{post.title}}<br/>{{post.birthdate}}<br/><br/>
+                    {% endfor %}
+                {% else %}
+                    No posts yet
+                {% endif %}
+                """
+    if 'username' in session.keys():
+        viewpage = Template(loggedintemplate+pagebody)
+        return render_template(viewpage, myposts=myposts,
+                               username=session['username'])
+    else:
+        viewpage = Template(notloggedintemplate+pagebody)
+        return render_template(viewpage, myposts=myposts)
 
 @app.route('/post/<int:postid>')
 def post_view(postid):
     mypost = get_post(postid)
-    viewpage = Template("""
-                        {{title}}<br/>{{birthdate}}<br/>
-                        {{body}}<br/><br/>
-                        """)
+    renderargs = {}
+    if mypost is not None:
+        pagebody = """
+                    {{mypost.title}}<br/>by {{mypost.author}}<br/>{{mypost.birthdate}}<br/>
+                    {{mypost.body}}<br/><br/>
+                    """
+        renderargs['mypost'] = mypost
+    else:
+        pagebody = "That post hasn't been written yet!"
+    if 'username' in session.keys():
+        viewpage = Template(loggedintemplate+pagebody)
+        renderargs['username'] = session['username']
+    else:
+        viewpage = Template(notloggedintemplate+pagebody)
+    return viewpage.render(**renderargs
+        )
+
+@app.route('/logout', methods=['POST'])
+def logoutview():
+    log_out()
+    return redirect('/')
+
+def log_out():
+    session.clear()
+
+@app.route('/login', methods=['POST'])
+def loginview():
+    pwd = request.form['password']
+    username = request.form['username']
+    return log_in(username, pwd)
+
+def log_in(username, pwd):
     try:
-        return viewpage.render(title=mypost.title,
-                               birthdate=mypost.birthdate,
-                               body=mypost.body)
+        session['username']=get_user_name(username, pwd)
+        return redirect('write')
     except AttributeError:
-        return Template("That post hasn't been written yet!").render()
+        return Template(notloggedintemplate+
+            """Username or password was incorrect""").render()
+
+def get_user_name(username, pwd):
+    pwdhash = bcrypt.generate_password_hash(pwd)
+    dbauthor = Author.query.filter_by(name=username).first()
+    if bcrypt.check_password_hash(pwdhash, dbauthor.password):
+        return username
+    else:
+        raise AttributeError
 
 @app.route('/write', methods=['GET', 'POST'])
 def write_view():
     if request.method == 'GET':
         #display the writing GUI
-        return Template("""
+        pagebody = """
             <form id='blagform' name='blagform' method='post' action='write'>
                 <textarea name='blagtext' id='textarea' rows='5' cols='100' placeholder='type your blag here'></textarea><br/>
                 <input type='submit' name='submit' id='submit' value='Submit'/>
             </form>
-            """).render()
+            """
+        if 'username' in session.keys():
+            viewpage = Template(loggedintemplate+pagebody)
+            return viewpage.render(username=session['username'])
+        else:
+            viewpage = Template(notloggedintemplate+
+                """You are not logged in, please use the form above.
+                """)
+            return viewpage.render()
     elif request.method == 'POST':
         #put the post in the database, then load the blog view
         return Template("success").render()
