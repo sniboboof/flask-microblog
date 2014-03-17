@@ -127,7 +127,28 @@ class testBlog(unittest.TestCase):
         assert 'username:' in rv.data
 
     def testWriteView(self):
-        pass
+        microblog.register_author('jack', 'markley')
+        microblog.register_author('jeff', 'haskins')
+        rv = self.app.get('/write')
+        assert 'not logged in' in rv.data
+        self.app.post('login', data={'username':'jack', 'password':'markley'}, follow_redirects=True)
+        rv = self.app.get('write')
+        assert 'Title:' in rv.data
+        rv = self.app.post('write', data={'blagtitle':'title1', 'blagbody':'look at me writing a blag'}, follow_redirects=True)
+        assert 'title1' in rv.data
+        assert 'jack' in rv.data
+        rv = self.app.post('write', data={'blagtitle':'title2', 'blagbody':'look at me writing a blag'}, follow_redirects=True)
+        assert 'title1' in rv.data
+        assert 'title2' in rv.data
+        assert 'jeff' not in rv.data
+        self.app.post('logout', follow_redirects=True)
+        self.app.post('login', data={'username':'jeff', 'password':'haskins'}, follow_redirects=True)
+        rv = self.app.post('write', data={'blagtitle':'title3', 'blagbody':'look at me writing a blag'}, follow_redirects=True)
+        assert 'title1' in rv.data
+        assert 'title2' in rv.data
+        assert 'title3' in rv.data
+        assert 'jeff' in rv.data
+        assert 'jack' in rv.data
 
 if __name__ == "__main__":
     unittest.main()

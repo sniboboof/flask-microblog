@@ -146,17 +146,17 @@ def loginview():
 
 def log_in(username, pwd):
     try:
-        session['username']=get_user_name(username, pwd)
+        session['username'], session['userid']=get_user(username, pwd)
         return redirect('write')
     except AttributeError:
         return Template(notloggedintemplate+
             """Username or password was incorrect""").render()
 
-def get_user_name(username, pwd):
+def get_user(username, pwd):
     pwdhash = bcrypt.generate_password_hash(pwd)
     dbauthor = Author.query.filter_by(name=username).first()
     if bcrypt.check_password_hash(pwdhash, dbauthor.password):
-        return username
+        return username, dbauthor.id
     else:
         raise AttributeError
 
@@ -166,7 +166,9 @@ def write_view():
         #display the writing GUI
         pagebody = """
             <form id='blagform' name='blagform' method='post' action='write'>
-                <textarea name='blagtext' id='textarea' rows='5' cols='100' placeholder='type your blag here'></textarea><br/>
+                Title: <input type='text' name='blagtitle' id='blagtitle'/><br/>
+                Body: <br/>
+                <textarea name='blagbody' id='blagbody' rows='5' cols='100' placeholder='type your blag here'></textarea><br/>
                 <input type='submit' name='submit' id='submit' value='Submit'/>
             </form>
             """
@@ -180,7 +182,10 @@ def write_view():
             return viewpage.render()
     elif request.method == 'POST':
         #put the post in the database, then load the blog view
-        return Template("success").render()
+        write_post(request.form['blagtitle'],
+            request.form['blagbody'],
+            session['userid'])
+        return redirect('/')
 
 if __name__ == "__main__":
     manager.run()
