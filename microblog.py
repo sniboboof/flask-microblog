@@ -78,10 +78,10 @@ def write_post(title, body, authorid):
     db.session.commit()
 
 def get_posts():
-    return BlagPost.query.order_by(BlagPost.birthdate.desc()).all()
+    return db.session.query(BlagPost, Author).join(Author).order_by(BlagPost.birthdate.desc()).all()
 
 def get_post(id):
-    q = BlagPost.query.filter_by(id=id)
+    q = db.session.query(BlagPost, Author).join(Author).filter(BlagPost.id==id)
     if q.count() != 0:
         return q.first()
     else:
@@ -93,7 +93,9 @@ def posts_view():
     pagebody = """
                 {% if myposts|length %}
                     {% for post in myposts %}
-                        {{post.title}}<br/>{{post.birthdate}}<br/><br/>
+                        {{post.BlagPost.title}}<br/>
+                        by {{post.Author.name}}<br/>
+                        {{post.BlagPost.birthdate}}<br/><br/>
                     {% endfor %}
                 {% else %}
                     No posts yet
@@ -113,8 +115,10 @@ def post_view(postid):
     renderargs = {}
     if mypost is not None:
         pagebody = """
-                    {{mypost.title}}<br/>by {{mypost.author}}<br/>{{mypost.birthdate}}<br/>
-                    {{mypost.body}}<br/><br/>
+                    {{mypost.BlagPost.title}}<br/>
+                    by {{mypost.Author.name}}<br/>
+                    {{mypost.BlagPost.birthdate}}<br/>
+                    {{mypost.BlagPost.body}}<br/><br/>
                     """
         renderargs['mypost'] = mypost
     else:
@@ -124,8 +128,7 @@ def post_view(postid):
         renderargs['username'] = session['username']
     else:
         viewpage = Template(notloggedintemplate+pagebody)
-    return viewpage.render(**renderargs
-        )
+    return viewpage.render(**renderargs)
 
 @app.route('/logout', methods=['POST'])
 def logoutview():

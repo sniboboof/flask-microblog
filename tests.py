@@ -47,8 +47,8 @@ class testBlog(unittest.TestCase):
         microblog.write_post("test title3", "test body3", 1)
         a = microblog.get_posts()
 
-        self.assertEqual(a[2].title, "test title")
-        self.assertEqual(a[0].body, "test body3")
+        self.assertEqual(a[2].BlagPost.title, "test title")
+        self.assertEqual(a[0].BlagPost.body, "test body3")
 
     def testSingleGet(self):
         microblog.register_author('jack', 'markley')
@@ -56,8 +56,8 @@ class testBlog(unittest.TestCase):
         microblog.write_post("test title2", "test body2", 1)
         microblog.write_post("test title3", "test body3", 1)
 
-        self.assertEqual(microblog.get_post(1).title, "test title")
-        self.assertEqual(microblog.get_post(3).body, "test body3")
+        self.assertEqual(microblog.get_post(1).BlagPost.title, "test title")
+        self.assertEqual(microblog.get_post(3).BlagPost.body, "test body3")
 
     def testPostsView(self):
         microblog.register_author('jack', 'markley')
