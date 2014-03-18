@@ -131,6 +131,7 @@ def write_nginxconf():
 
 def _sync_it():
     rsync_project('/home/ubuntu/', 'flask-microblog')
+    sudo('pip install -r ~/flask-microblog/requirements.txt')
     # sudo('mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.orig')
     # sudo('cp flask-miroblog_package/server_config/simple_nginx_config /etc/nginx/sites-available/default')
     # sudo('cp flask-miroblog_package/server_config/note_tagger_gun.conf /etc/supervisor/conf.d/')
@@ -147,7 +148,11 @@ def _install_dep():
     sudo('apt-get -y install supervisor')
     sudo('apt-get -y install gunicorn')
     sudo('apt-get -y install python-pip')
-    #sudo('pip install -r requirements.txt')
+    sudo('apt-get update')
+    sudo('apt-get -y install libpq-dev')
+    sudo('apt-get -y install python-dev')
+    sudo('apt-get -y install postgresql')
+    sudo('apt-get -y upgrade gunicorn')
 
 def install_dep():
     run_command_on_selected_server(_install_dep)
@@ -168,8 +173,8 @@ def deploy():
     new_inst()
     time.sleep(15)
     # write_nginxconf()
-    sync_it()
     install_dep()
+    sync_it()
     start_server()
     # get_info()
 
