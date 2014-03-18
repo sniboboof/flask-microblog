@@ -126,19 +126,19 @@ def write_nginxconf():
     nginx_list.append('    }')
     nginx_list.append('}')
     nginx_config = '\n'.join(nginx_list)
-    with open('flask-microblog_package/server_config/simple_nginx_config', 'w') as outfile:
+    with open('flask-microblog/server_config/simple_nginx_config', 'w') as outfile:
             outfile.write(nginx_config)
 
 def _sync_it():
     rsync_project('/home/ubuntu/', 'flask-microblog')
     sudo('pip install -r ~/flask-microblog/requirements.txt')
-    # sudo('mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.orig')
-    # sudo('cp flask-miroblog_package/server_config/simple_nginx_config /etc/nginx/sites-available/default')
-    # sudo('cp flask-miroblog_package/server_config/note_tagger_gun.conf /etc/supervisor/conf.d/')
-    # sudo('mkdir /var/www; mkdir /var/www/flask-microblog')
-    # # sudo('ln -s note-tagger_package/note_tagger/static /var/www/note-tagger/')
-    # sudo('cp -r flask-miroblog_package/note_tagger/static /var/www/flask-microblog/')
-    # sudo('cd flask-miroblog_package/ && python setup.py develop')
+    sudo('mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.orig')
+    sudo('cp flask-microblog/server_config/simple_nginx_config /etc/nginx/sites-available/default')
+    #sudo('cp flask-microblog/server_config/note_tagger_gun.conf /etc/supervisor/conf.d/')
+    sudo('mkdir /var/www; mkdir /var/www/flask-microblog')
+    # sudo('ln -s note-tagger_package/note_tagger/static /var/www/note-tagger/')
+    # sudo('cp -r flask-microblog/note_tagger/static /var/www/flask-microblog/')
+    # sudo('cd flask-microblog_package/ && python setup.py develop')
 
 def sync_it():
     run_command_on_selected_server(_sync_it)
@@ -158,13 +158,12 @@ def install_dep():
     run_command_on_selected_server(_install_dep)
 
 def _start_server():
-    sudo('gunicorn --workers=2 microblog:app')
-    # sudo('/etc/init.d/nginx start')
-    # sudo('unlink /run/supervisor.sock')
-    # sudo('service supervisor stop')
-    # sudo('service supervisor start')
-    # sudo('/etc/init.d/supervisor stop')
-    # sudo('/etc/init.d/supervisor start')
+    sudo('/etc/init.d/nginx start')
+    sudo('unlink /run/supervisor.sock')
+    sudo('service supervisor stop')
+    sudo('service supervisor start')
+    sudo('/etc/init.d/supervisor stop')
+    sudo('/etc/init.d/supervisor start')
 
 def start_server():
     run_command_on_selected_server(_start_server)
@@ -172,13 +171,14 @@ def start_server():
 def deploy():
     new_inst()
     time.sleep(15)
-    # write_nginxconf()
+    write_nginxconf()
     install_dep()
     sync_it()
     start_server()
     # get_info()
 
 def deploy_existing():
+    write_nginxconf()
     install_dep()
     sync_it()
     start_server
