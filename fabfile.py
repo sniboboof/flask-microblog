@@ -131,7 +131,6 @@ def write_nginxconf():
 
 def _sync_it():
     rsync_project('/home/ubuntu/', 'flask-microblog')
-    sudo('pip install -r ~/flask-microblog/requirements.txt')
     sudo('mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.orig')
     sudo('cp flask-microblog/server_config/simple_nginx_config /etc/nginx/sites-available/default')
     #sudo('cp flask-microblog/server_config/note_tagger_gun.conf /etc/supervisor/conf.d/')
@@ -139,6 +138,7 @@ def _sync_it():
     # sudo('ln -s note-tagger_package/note_tagger/static /var/www/note-tagger/')
     # sudo('cp -r flask-microblog/note_tagger/static /var/www/flask-microblog/')
     # sudo('cd flask-microblog_package/ && python setup.py develop')
+    sudo('pip install -r ~/flask-microblog/requirements.txt')
 
 def sync_it():
     run_command_on_selected_server(_sync_it)
@@ -171,16 +171,16 @@ def start_server():
 def deploy():
     new_inst()
     time.sleep(15)
-    write_nginxconf()
     install_dep()
     sync_it()
+    write_nginxconf()
     start_server()
     # get_info()
 
 def deploy_existing():
-    write_nginxconf()
     install_dep()
     sync_it()
+    write_nginxconf()
     start_server
 
 def get_info():
