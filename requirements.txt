@@ -12,6 +12,7 @@ Werkzeug==0.9.4
 alembic==0.6.3
 boto==2.27.0
 ecdsa==0.11
+gunicorn==18.0
 itsdangerous==0.23
 paramiko==1.13.0
 psycopg2==2.5.2
