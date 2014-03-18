@@ -133,11 +133,11 @@ def _sync_it():
     rsync_project('/home/ubuntu/', 'flask-microblog')
     sudo('mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.orig')
     sudo('cp flask-microblog/server_config/simple_nginx_config /etc/nginx/sites-available/default')
-    #sudo('cp flask-microblog/server_config/note_tagger_gun.conf /etc/supervisor/conf.d/')
-    sudo('mkdir /var/www; mkdir /var/www/flask-microblog')
+    sudo('cp flask-microblog/server_config/microblog_gun.conf /etc/supervisor/conf.d/')
+    #sudo('mkdir /var/www; mkdir /var/www/flask-microblog')
     # sudo('ln -s note-tagger_package/note_tagger/static /var/www/note-tagger/')
     # sudo('cp -r flask-microblog/note_tagger/static /var/www/flask-microblog/')
-    # sudo('cd flask-microblog_package/ && python setup.py develop')
+    sudo('python flask-microblog/setup.py develop')
     sudo('pip install -r ~/flask-microblog/requirements.txt')
 
 def sync_it():
@@ -158,6 +158,7 @@ def install_dep():
     run_command_on_selected_server(_install_dep)
 
 def _start_server():
+    # sudo('gunicorn --workers=2 --pythonpath flask-microblog microblog:app')
     sudo('/etc/init.d/nginx start')
     sudo('unlink /run/supervisor.sock')
     sudo('service supervisor stop')
@@ -171,17 +172,14 @@ def start_server():
 def deploy():
     new_inst()
     time.sleep(15)
-    install_dep()
-    sync_it()
-    write_nginxconf()
-    start_server()
-    # get_info()
+    deploy_existing()
 
 def deploy_existing():
     install_dep()
     sync_it()
     write_nginxconf()
-    start_server
+    start_server()
+    # get_info()
 
 def get_info():
     select_instance()

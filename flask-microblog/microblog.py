@@ -69,8 +69,18 @@ class Author(db.Model):
         self.name = name
         self.password = password
 
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column
+
+    def __init__(self, catName):
+        self.category=catName
+
 def register_author(name, password):
-    db.session.add(Author(unicode(name), unicode(password)))
+    import pdb
+    pdb.set_trace()
+    pwdhash = bcrypt.generate_password_hash(password)
+    db.session.add(Author(unicode(name), unicode(pwdhash)))
     db.session.commit()
 
 def write_post(title, body, authorid):
@@ -153,9 +163,8 @@ def log_in(username, pwd):
             """Username or password was incorrect""").render()
 
 def get_user(username, pwd):
-    pwdhash = bcrypt.generate_password_hash(pwd)
     dbauthor = Author.query.filter_by(name=username).first()
-    if bcrypt.check_password_hash(pwdhash, dbauthor.password):
+    if bcrypt.check_password_hash(pwd, dbauthor.password):
         return username, dbauthor.id
     else:
         raise AttributeError
