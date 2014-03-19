@@ -77,8 +77,6 @@ class Category(db.Model):
         self.category=catName
 
 def register_author(name, password):
-    import pdb
-    pdb.set_trace()
     pwdhash = bcrypt.generate_password_hash(password)
     db.session.add(Author(unicode(name), unicode(pwdhash)))
     db.session.commit()

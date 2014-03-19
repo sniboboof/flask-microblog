@@ -158,7 +158,7 @@ def install_dep():
     run_command_on_selected_server(_install_dep)
 
 def _start_server():
-    # sudo('gunicorn --workers=2 --pythonpath flask-microblog microblog:app')
+    sudo('/etc/init.d/nginx stop')
     sudo('/etc/init.d/nginx start')
     sudo('unlink /run/supervisor.sock')
     sudo('service supervisor stop')
@@ -174,10 +174,21 @@ def deploy():
     time.sleep(15)
     deploy_existing()
 
+def sql_setup():
+    run_command_on_selected_server(_sql_setup)
+
+def _sql_setup():
+    sudo('cp flask-microblog/server_config/pg_hba.conf /etc/postgresql/9.1/main/pg_hba.conf')
+    sudo("sudo -u postgres psql -c 'SELECT pg_reload_conf();'")
+    sudo("sudo -u postgres psql -c 'CREATE DATABASE microblog;'")
+    sudo("sudo -u postgres psql -c 'CREATE USER ubuntu;'")
+    sudo("sudo -u ubuntu python flask-microblog/sqlsetup.py")
+
 def deploy_existing():
     install_dep()
     sync_it()
     write_nginxconf()
+    sql_setup()
     start_server()
     # get_info()
 
