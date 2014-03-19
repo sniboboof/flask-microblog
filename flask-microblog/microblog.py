@@ -162,7 +162,7 @@ def log_in(username, pwd):
 
 def get_user(username, pwd):
     dbauthor = Author.query.filter_by(name=username).first()
-    if bcrypt.check_password_hash(pwd, dbauthor.password):
+    if bcrypt.check_password_hash(dbauthor.password, pwd):
         return username, dbauthor.id
     else:
         raise AttributeError

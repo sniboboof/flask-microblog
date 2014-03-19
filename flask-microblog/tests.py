@@ -26,8 +26,8 @@ class testBlog(unittest.TestCase):
 
         self.assertEqual(authros[0].name, 'jack')
         self.assertEqual(authros[2].name, 'jeff')
-        self.assertEqual(authros[1].password, 'markley')
-        self.assertEqual(authros[2].password, 'david')
+        self.assertEqual(microblog.bcrypt.check_password_hash(authros[1].password, 'markley'), True)
+        self.assertEqual(microblog.bcrypt.check_password_hash(authros[2].password, 'david'), True)
 
     def testBlagPost(self):
         microblog.register_author('jack', 'markley')
