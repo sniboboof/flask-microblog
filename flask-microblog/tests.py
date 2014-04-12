@@ -2,11 +2,13 @@ import microblog
 import unittest
 import os
 
+
 class testBlog(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(testBlog, self).__init__(*args, **kwargs)
-        microblog.app.config['SQLALCHEMY_DATABASE_URI']='postgres://postgres:@localhost/blagtest'
-        microblog.app.config['TESTING']=True
+        microblog.app.config['SQLALCHEMY_DATABASE_URI'] = \
+            'postgres://postgres:@localhost/blagtest'
+        microblog.app.config['TESTING'] = True
 
     def setUp(self):
         microblog.app.config['TESTING'] = True
@@ -26,8 +28,12 @@ class testBlog(unittest.TestCase):
 
         self.assertEqual(authros[0].name, 'jack')
         self.assertEqual(authros[2].name, 'jeff')
-        self.assertEqual(microblog.bcrypt.check_password_hash(authros[1].password, 'markley'), True)
-        self.assertEqual(microblog.bcrypt.check_password_hash(authros[2].password, 'david'), True)
+        self.assertEqual(microblog.bcrypt.
+                         check_password_hash(authros[1].password, 'markley'),
+                         True)
+        self.assertEqual(microblog.bcrypt.
+                         check_password_hash(authros[2].password, 'david'),
+                         True)
 
     def testBlagPost(self):
         microblog.register_author('jack', 'markley')
@@ -108,13 +114,18 @@ class testBlog(unittest.TestCase):
         assert 'Method Not Allowed' in rv.data
         microblog.register_author('jack', 'markley')
         microblog.register_author('jeff', 'haskins')
-        rv = self.app.post('login', data={'username':'hurr', 'password':'durr'})
+        rv = self.app.post('login', data={'username': 'hurr',
+                                          'password': 'durr'})
         assert 'Username or password was incorrect' in rv.data
-        rv = self.app.post('login', data={'username':'jack', 'password':'durr'})
+        rv = self.app.post('login', data={'username': 'jack',
+                                          'password': 'durr'})
         assert "Username or password was incorrect" in rv.data
-        rv = self.app.post('login', data={'username':'jeff', 'password':'markley'})
+        rv = self.app.post('login', data={'username': 'jeff',
+                                          'password': 'markley'})
         assert "Username or password was incorrect" in rv.data
-        rv = self.app.post('login', data={'username':'jack', 'password':'markley'}, follow_redirects=True)
+        rv = self.app.post('login', data={'username': 'jack',
+                                          'password': 'markley'},
+                           follow_redirects=True)
         assert "logged in as jack" in rv.data
 
     def testLogOut(self):
@@ -122,8 +133,8 @@ class testBlog(unittest.TestCase):
         microblog.register_author('jeff', 'haskins')
         rv = self.app.get('/logout', follow_redirects=True)
         assert 'Method Not Allowed' in rv.data
-        self.app.post('login', {'username':'jack', 'password':'markley'})
-        rv=self.app.post('/logout', follow_redirects=True)
+        self.app.post('login', {'username': 'jack', 'password': 'markley'})
+        rv = self.app.post('/logout', follow_redirects=True)
         assert 'username:' in rv.data
 
     def testWriteView(self):
@@ -131,24 +142,52 @@ class testBlog(unittest.TestCase):
         microblog.register_author('jeff', 'haskins')
         rv = self.app.get('/write')
         assert 'not logged in' in rv.data
-        self.app.post('login', data={'username':'jack', 'password':'markley'}, follow_redirects=True)
+        self.app.post('login',
+                      data={'username': 'jack', 'password': 'markley'},
+                      follow_redirects=True)
         rv = self.app.get('write')
         assert 'Title:' in rv.data
-        rv = self.app.post('write', data={'blagtitle':'title1', 'blagbody':'look at me writing a blag'}, follow_redirects=True)
+        rv = self.app.post('write',
+                           data={'blagtitle': 'title1',
+                                 'blagbody': 'look at me writing a blag'},
+                           follow_redirects=True)
         assert 'title1' in rv.data
         assert 'jack' in rv.data
-        rv = self.app.post('write', data={'blagtitle':'title2', 'blagbody':'look at me writing a blag'}, follow_redirects=True)
+        rv = self.app.post('write',
+                           data={'blagtitle': 'title2',
+                                 'blagbody': 'look at me writing a blag'},
+                           follow_redirects=True)
         assert 'title1' in rv.data
         assert 'title2' in rv.data
         assert 'jeff' not in rv.data
         self.app.post('logout', follow_redirects=True)
-        self.app.post('login', data={'username':'jeff', 'password':'haskins'}, follow_redirects=True)
-        rv = self.app.post('write', data={'blagtitle':'title3', 'blagbody':'look at me writing a blag'}, follow_redirects=True)
+        self.app.post('login',
+                      data={'username': 'jeff', 'password': 'haskins'},
+                      follow_redirects=True)
+        rv = self.app.post('write',
+                           data={'blagtitle': 'title3',
+                                 'blagbody': 'look at me writing a blag'},
+                           follow_redirects=True)
         assert 'title1' in rv.data
         assert 'title2' in rv.data
         assert 'title3' in rv.data
         assert 'jeff' in rv.data
         assert 'jack' in rv.data
+
+    def testCategories(self):
+        microblog.register_author('jack', 'markley')
+        testpost = microblog.write_post("test title", "test body", 1)
+        testcategory = microblog.new_category('testcategory')
+        microblog.link_post_category(testpost, testcategory)
+        assert testcategory in testpost.categories
+
+    def testCategoryView(self):
+        microblog.register_author('jack', 'markley')
+        testpost = microblog.write_post("test title", "test body", 1)
+        testcategory = microblog.new_category('testcategory')
+        microblog.link_post_category(testpost, testcategory)
+        rv = self.app.get('category/1')
+        assert 'test title' in rv.data
 
 if __name__ == "__main__":
     unittest.main()

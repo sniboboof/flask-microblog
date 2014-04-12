@@ -181,7 +181,9 @@ def _sql_setup():
     sudo('cp flask-microblog/server_config/pg_hba.conf /etc/postgresql/9.1/main/pg_hba.conf')
     sudo("sudo -u postgres psql -c 'SELECT pg_reload_conf();'")
     sudo("sudo -u postgres psql -c 'CREATE DATABASE microblog;'")
-    sudo("sudo -u postgres psql -c 'CREATE USER ubuntu;'")
+    sudo("sudo -u postgres psql -c 'CREATE DATABASE blagtest;'")
+    sudo("sudo -u postgres psql -c 'CREATE USER ubuntu WITH SUPERUSER;'")
+    sudo("sudo -u postgres psql -c 'CREATE USER nobody WITH SUPERUSER;'")
     sudo("sudo -u ubuntu python flask-microblog/sqlsetup.py")
 
 def deploy_existing():
