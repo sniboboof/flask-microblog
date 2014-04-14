@@ -1,3 +1,5 @@
+a multi-step assignment for Code Fellows
+
 microblog flask app
 
 currently has 3 functions
